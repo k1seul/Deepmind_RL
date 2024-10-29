@@ -19,6 +19,7 @@ if __name__ == "__main__":
     # my_list = [1, 2, 3, 4, 5]
     check_memory_usage(my_list)
     # check_memory_usage(my_array)
+    from pympler import asizeof
     total_size = asizeof.asizeof(my_list)
     print(f'Total memory usage of the list (including contents): {total_size/(1024 ** 3)} GB')
     

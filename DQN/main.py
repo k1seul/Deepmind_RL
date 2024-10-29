@@ -160,7 +160,7 @@ class Agent:
 
     def action(self, state, exploit = False):
         if random.random() < self.epsilon and not exploit:
-            action = random.randint(0, self.n_actions-1)
+            action = random.randint(0, self.n_actions - 1 )
             self.epsilon = max(self.epsilon - self.epsilon_decay_rate, self.epsilon_final)
         else:    
             obs = torch.tensor(state, dtype=torch.float32).to(self.device)
