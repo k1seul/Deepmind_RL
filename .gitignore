@@ -1,0 +1,17 @@
+# Ignore all files in the 'temp' directory
+temp/
+
+# Ignore all .log files
+*.log
+
+# Ignore the compiled files
+*.o
+*.out
+
+# Ignore node_modules folder
+node_modules/
+
+# Ignore Python cache files
+__pycache__/
+*.py[cod]
+
