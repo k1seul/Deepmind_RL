@@ -240,14 +240,16 @@ class Agent:
 
         Q_target_next_states = self.target_net(next_states).detach()
         # Q_next_states = self.network(next_states).detach() 
+        Q_current_states = self.network(states)
 
         ### DDQN changes
-        Q_max_next_actions = torch.argmax(Q_target_next_states, axis=1)
+        Q_next_states = self.network(next_states).detach() 
+        Q_max_next_actions = torch.argmax(Q_next_states, axis=1)
 
         # Q_next_states = self.network(next_states).detach()
         # import pdb; pdb.set_trace()
         y_i = rewards + self.gamma * Q_target_next_states[range(Q_max_next_actions.shape[0]), Q_max_next_actions]* (1 - dones)
-        Q_current_states = self.network(states)
+        
         Q_current_states = Q_current_states[torch.arange(Q_current_states.size(0)), actions]
 
 
@@ -280,7 +282,7 @@ if __name__ == '__main__':
         gc.collect()
         # Get the current date and time to format the log directory name
         now = datetime.now()
-        day_time = now.strftime("%m%d_%H%M")
+        day_time = now.strftime("%m%d_%H")
 
         # Check existing runs and determine the next run number
         base_dir = "runs"
