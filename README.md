@@ -42,6 +42,7 @@ Note:
 |-------|------|
 |frame stack|4|
 |training frames|40 million(4 skipped frame)|
+|buffer size|1 million|
 |n-step|1|
 |update frequncy|4|
 |train start frame|8000|
