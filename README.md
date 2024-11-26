@@ -31,6 +31,13 @@ Note:
 1) Some of the enviroments(such as breakout) trained better by using episodic life(termination of environment after single failure) but some enviroment such as pong did not. I will specifiy which enviroment was used having episodic life.
 2) Also metric used in this reimplementation is maximum rewards of 10 agents with non-episodic life. This can be misleading estimation of point stastics showing only agents with best performance. But since the objective of this project is to reimplement and show the exact performance metric shown on each of the paper, I will follow the maximum performance metric.
 
+### Reimplementation Targets 
+![image](https://github.com/user-attachments/assets/9229a82b-11b0-4d5b-99be-47f8d55f0280)
+
+![image](https://github.com/user-attachments/assets/ab78f449-8692-470e-a9fc-54acf55fa7de)
+
+
+
 
 
 
