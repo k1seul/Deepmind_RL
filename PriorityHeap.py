@@ -65,58 +65,6 @@ class PriorityHeap:
         self.perheap[indicies, 0] = priorities
         # pdb.set_trace()
 
-
-
-
-# class TestPriorityHeap(unittest.TestCase):
-#     def setUp(self):
-#         self.maxlen = 10  # Use a smaller size for testing
-#         self.heap = PriorityHeap(maxlen=self.maxlen)
-
-#     def test_initialization(self):
-#         self.assertEqual(self.heap.capacity, self.maxlen)
-#         self.assertEqual(self.heap.position, 0)
-#         np.testing.assert_array_equal(self.heap.perheap, np.zeros((self.maxlen, 2)))
-
-#     def test_add_element(self):
-#         self.heap.add_element(index=0, td_error=5)
-#         self.assertEqual(self.heap.position, 1)
-#         self.assertEqual(self.heap.perheap[0, 0], 5)
-#         self.assertEqual(self.heap.perheap[0, 1], 0)
-
-#     def test_add_element_exceeds_capacity(self):
-#         for i in range(15):  # Add more elements than capacity
-#             self.heap.add_element(index=i, td_error=i)
-#         self.assertEqual(self.heap.position, self.maxlen - 1)  # Position should not exceed maxlen
-#         self.assertEqual(self.heap.perheap[9, 0], 14)  # Last element added should be td_error 9
-
-#     def test_sum(self):
-#         self.heap.add_element(index=0, td_error=1)
-#         self.heap.add_element(index=1, td_error=2)
-#         self.assertEqual(self.heap.__sum__(), (1**self.heap.alpha + 2**self.heap.alpha))
-
-#     def test_max(self):
-#         self.heap.add_element(index=0, td_error=3)
-#         self.heap.add_element(index=1, td_error=5)
-#         self.assertEqual(self.heap.__max__(), 5)
-
-#     def test_sort(self):
-#         self.heap.add_element(index=0, td_error=2)
-#         self.heap.add_element(index=1, td_error=1)
-#         self.heap.add_element(index=2, td_error=3)
-#         self.heap.sort()
-#         sorted_priorities = np.array([3,2,1])
-#         print(self.heap.perheap)
-#         np.testing.assert_array_equal(self.heap.perheap[:3, 0], sorted_priorities)
-
-#     def test_update_elements(self):
-#         self.heap.add_element(index=0, td_error=2)
-#         self.heap.add_element(index=1, td_error=3)
-#         self.heap.update_elements([0, 1], [5, 6])
-#         self.assertEqual(self.heap.perheap[0, 0], 5)
-#         self.assertEqual(self.heap.perheap[1, 0], 6)
-
-
 class SumTree:
     def __init__(self, capacity):
         self.capacity = capacity 
@@ -259,42 +207,6 @@ class TestSumTree(unittest.TestCase):
         self.assertEqual(result[2][2], 2)
         self.assertEqual(result[3][2], 3)
     
-    # def test_sample(self):
-    #     """Test the sample method to ensure it retrieves a batch of priorities and indices."""
-    #     values = [1.0, 2.0, 3.0, 4.0]
-    #     for i, v in enumerate(values):
-    #         self.sum_tree.add(v, i)
-        
-    #     leaf_indices, priorities, data_indices = self.sum_tree.sample()
-        
-    #     # Verify output sizes and data types
-    #     self.assertEqual(len(leaf_indices), self.sum_tree.batch_size)
-    #     self.assertEqual(len(priorities), self.sum_tree.batch_size)
-    #     self.assertEqual(len(data_indices), self.sum_tree.batch_size)
-    #     self.assertTrue(isinstance(priorities, np.ndarray))
-    #     self.assertTrue(isinstance(data_indices, np.ndarray))
-    
-    # def test_total_sum(self):
-    #     """Test the total_sum property."""
-    #     values = [1.0, 2.0, 3.0, 4.0]
-    #     expected_total = sum([v ** self.sum_tree.alpha for v in values])
-        
-    #     for i, v in enumerate(values):
-    #         self.sum_tree.add(v, i)
-        
-    #     self.assertAlmostEqual(self.sum_tree.total_sum, expected_total)
-    
-    # def test_max(self):
-    #     """Test the max property to ensure it returns the correct maximum value in the tree."""
-    #     values = [1.0, 2.0, 3.0, 4.0]
-        
-    #     for i, v in enumerate(values):
-    #         self.sum_tree.add(v, i)
-        
-    #     expected_max = max(v ** self.sum_tree.alpha for v in values)
-    #     self.assertEqual(self.sum_tree.max, max(expected_max, 1), "Max should return the highest priority or 1 as the minimum")
-
-
 
 if __name__ == '__main__':
     # unittest.main()

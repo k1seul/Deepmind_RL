@@ -358,11 +358,8 @@ if __name__ == '__main__':
         img, reward, done, trun, _ = env.step(action)
         show_img(img, i)
 
-    # check_mem(env)
     print(state)
 
-    
 
-    # print(type(env))
 
     

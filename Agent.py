@@ -271,69 +271,6 @@ class Agent:
 
         return action
     
-    # def update(self, samples):
-
-    #     if self.per: 
-    #         states, actions, rewards, next_states, dones, importance_weight = samples
-    #     else: 
-    #         states, actions, rewards, next_states, dones = samples
-        
-
-    #     states = torch.tensor(states, device=self.device, dtype=torch.float32)
-    #     actions = torch.tensor(actions, device=self.device, dtype=torch.int64)
-    #     rewards = torch.tensor(rewards, device=self.device, dtype=torch.float32)
-    #     next_states = torch.tensor(next_states, device=self.device, dtype=torch.float32)
-    #     dones = torch.tensor(dones, device=self.device, dtype=torch.float32)
-
-    #     if self.per: 
-    #         importance_weight = torch.tensor(importance_weight, device=self.device, dtype=torch.float32)
-    #         # print(sum(importance_weight))
-
-    #     if self.double_net:
-    #         Q_target_n_next_states = self.target_net(next_states[-1])
-            
-    #     else:
-    #         Q_target_n_next_states = self.network(next_states[-1])
-
-    #     Q_current_states = self.network(states[0])
-    #     Q_next_states = self.network(next_states[-1])
-    #     Q_max_next_actions = torch.argmax(Q_next_states, axis=1)
-    #     y_i = rewards[0]
-
-    #     for i in range(1, self.n_steps):
-    #         reward_to_add = rewards[i] * self.gamma ** i
-    #         for j in range(i):
-    #             reward_to_add *= (1 - dones[j])
-    #         y_i += reward_to_add 
-
-    #     reward_to_add = self.gamma **(self.n_steps) * Q_target_n_next_states[range(Q_max_next_actions.shape[0]), Q_max_next_actions]
-    #     for i in range(self.n_steps):
-    #         reward_to_add *= (1-dones[i])
-
-    #     y_i += reward_to_add 
-
-    #     Q_current_states = Q_current_states.gather(1, actions[0].unsqueeze(1)).squeeze(1)
-    #     loss = self.loss(Q_current_states, y_i.detach())
-    #     if self.per:
-    #         loss = (loss * importance_weight).mean()
-            
-    
-            
-
-        
-        
-    #     self.optim.zero_grad()
-    #     loss.backward() 
-    #     self.optim.step()
-    #     avg_q_value = torch.mean(Q_current_states).detach().cpu().numpy()
-    #     td_loss = float(loss.detach().cpu().numpy() / 32)
-
-    #     if self.per:
-    #         losses = torch.abs(Q_current_states - y_i).detach().cpu().numpy() 
-
-    #     return avg_q_value, td_loss
-    
-
     def update(self, samples):
         if self.per: 
             states, actions, rewards, next_states, dones, importance_weight = samples

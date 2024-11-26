@@ -42,14 +42,6 @@ class DQN(nn.Module):
         x = self.fc2(x)
         return x 
     
-    # def reset(self):
-    #     self.fc1.reset_noise()
-    #     self.fc2.reset_noise()
-
-    # def set_zero_noise(self):
-    #     self.fc1.set_noise_zero()
-    #     self.fc2.set_noise_zero()
-    
 class DuelDQN(nn.Module):
     def __init__(self, args, n_actions=4):
         super().__init__()
@@ -173,54 +165,7 @@ class DualDQNSimple(nn.Module):
         
         # Combining value and advantage as per dueling DQN
         q_values = val + adv - adv.mean(dim=1, keepdim=True)
-        return q_values
-
-# class NoisyLayer(nn.Module):
-#     def __init__(self, n_inputs, n_outputs, device):
-#         super().__init__()
-#         self.n_inputs = n_inputs 
-#         self.n_outputs = n_outputs 
-#         self.device = device 
-
-#         self.mu_w = nn.Parameter(torch.Tensor(self. n_outputs, self.n_inputs)).to(device)
-#         self.sigma_w = nn.Parameter(torch.Tensor(self.n_outputs, self.n_inputs)).to(device)
-#         self.register_buffer('weight_epsilon', torch.FloatTensor(self.n_outputs, self.n_inputs).to(device))
-
-#         self.mu_b = nn.Parameter(torch.Tensor(self.n_outputs)).to(device)
-#         self.sigma_b = nn.Parameter(torch.Tensor(self.n_outputs)).to(device)
-#         self.register_buffer('bias_epsilon', torch.FloatTensor(self.n_outputs).to(device))
-
-
-#         with torch.no_grad():
-
-#             self.mu_w.data.uniform_(-1/math.sqrt(self.n_inputs), 1 / math.sqrt(self.n_inputs))
-#             self.sigma_w.fill_(0.1/math.sqrt(self.n_inputs))
-
-#             self.mu_b.data.uniform_(-1/math.sqrt(self.n_inputs), 1/math.sqrt(self.n_inputs))
-#             self.sigma_b.data.fill_(0.1/math.sqrt(self.n_outputs))
-#         self.reset_noise()
-
-
-#     def forward(self, inputs):
-#         x = inputs
-#         weights = self.mu_w + self.sigma_w * self.weight_epsilon
-#         biases = self.mu_b + self.sigma_b * self.bias_epsilon
-#         x = F.linear(x, weights, biases)
-#         return x 
-    
-#     @staticmethod 
-#     def f(x):
-#         return torch.sign(x) * torch.sqrt(torch.abs(x))
-    
-#     def reset_noise(self):
-#         epsilon_i = self.f(torch.randn(self.n_inputs, device=self.device))
-#         epsilon_j = self.f(torch.randn(self.n_outputs, device=self.device))
-#         self.weight_epsilon.copy_(epsilon_j.ger(epsilon_i))
-#         self.bias_epsilon.copy_(epsilon_j)
-
-#     def set_noise_zero(self):
-#         self.weight_epsilon.copy_(torch.zeros_like(self.weight_epsilon))
-#         self.bias_epsilon.copy_(torch.zeros_like(self.bias_epsilon)) 
+        return q_values  
 
 class NoisyLayer(nn.Linear):
     def __init__(self, n_inputs, n_outputs, device='cuda', sigma_zero=0.4, bias=True):
