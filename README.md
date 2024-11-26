@@ -17,7 +17,7 @@ I will also describe each parameters and preprocessing of atari envrionment need
 * RAM: ddr4 64GB
 * GPU: RTX4070(12GB
 
-Environment used is the Arcade Learning Environment([ALE(https://ale.farama.org/)) which was ran on the cpu. Although computation times might vary, running 1 million frames(4 skipped frames, so 4 million frames to be exact) took about 3 hours with about 10GB of memory used(1 million episode replay buffer). With multiprocessing, I could run about 5 environment with 80~90% CPU(4.36/3.7GHz), 82%(51GB) Memory used and 1.7/12 GB GPU memory use. Because of the main network being small (3 conv layers and 2 fc layers) and environment running on cpu, the main bottleneck for the computation time and memory used were heavly dependant on cpu.
+Environment used is the Arcade Learning Environment([ALE(https://ale.farama.org/)) which was ran on the cpu. Although computation times might vary, running 1 million frames(4 skipped frames, so 4 million frames to be exact) took about 3 hours with about 10GB of memory used(1 million episode replay buffer). With multiprocessing, I could run about 5 environment with 80~90% CPU(4.36/3.7GHz), 82%(51GB) Memory used and 1.7 GB GPU memory use. Because of the main network being small (3 conv layers and 2 fc layers) and environment running on cpu, the main bottleneck for the computation time and memory used were heavly dependant on cpu.
 
 
 
