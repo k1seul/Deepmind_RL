@@ -5,15 +5,36 @@ import time
 
 
 import gymnasium as gym
-import ale_py
 
-gym.register_envs(ale_py)
-# Set up the environment
+
+
 
 
 # Create the Breakout environment
-env = gym.make('ALE/Breakout-v5', render_mode = 'human')
-env.reset()
+class ObservationWrapper(gym.ObservationWrapper):
+    def __init__(self, env):
+        """Constructor for the observation wrapper."""
+        super().__init__(env)
+        self.epi = 0
+
+    def observation(self, observation):
+            
+        observation[2] = -observation[2]
+        print(observation)
+
+        return observation
+
+
+def make_reverse_env(env="CartPole-v1", reversed=True):
+
+    env = gym.make(env, render_mode='human')
+
+    if reversed:
+        env = ObservationWrapper(env)
+    return env
+
+env = make_reverse_env(reversed=False)
+env.reset(seed=0)
 
 # Define actions based on key presses
 action_mapping = {
@@ -45,7 +66,9 @@ while not done:
     state, reward, done, *info = env.step(action)
     env.render()
     
+    print(state)
+    
     # Introduce a small delay to make it playable
-    time.sleep(0.01)
+    time.sleep(1)
 
 env.close()
