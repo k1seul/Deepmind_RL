@@ -27,9 +27,9 @@ Environment used is the Arcade Learning Environment([ALE(https://ale.farama.org/
 * SpaceInvaders ([ALE/SpaceInvaders-v5](https://ale.farama.org/environments/space_invaders/), with action_repeat_prob = 0)
 * Zaxxon ([ALE/Zaxxon-v5](https://ale.farama.org/environments/zaxxon/), with action_repeat_prob = 0)
 
-*Note:* 
-1) *Some of the enviroments(such as breakout) trained better by using episodic life(termination of environment after single failure) but some enviroment such as pong did not. I will specifiy which enviroment was used having episodic life.*
-2) *Also metric used in this reimplementation is maximum rewards of 10 agents with non-episodic life. This can be misleading estimation of point stastics showing only agents with best performance. But since the objective of this project is to reimplement and show the exact performance metric shown on each of the paper, I will follow the maximum performance metric.*
+Note:
+1) Some of the enviroments(such as breakout) trained better by using episodic life(termination of environment after single failure) but some enviroment such as pong did not. I will specifiy which enviroment was used having episodic life.
+2) Also metric used in this reimplementation is maximum rewards of 10 agents with non-episodic life. This can be misleading estimation of point stastics showing only agents with best performance. But since the objective of this project is to reimplement and show the exact performance metric shown on each of the paper, I will follow the maximum performance metric.
 
 
 
