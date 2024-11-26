@@ -15,10 +15,20 @@ I will also describe each parameters and preprocessing of atari envrionment need
 ### Hardwhere Spec
 * CPU: RYZEN 5 5600X 6-Core Processor
 * RAM: ddr4 64GB
-* GPU: RTX4070(12GB
+* GPU: RTX4070(12GB)
 
 Environment used is the Arcade Learning Environment([ALE(https://ale.farama.org/)) which was ran on the cpu. Although computation times might vary, running 1 million frames(4 skipped frames, so 4 million frames to be exact) took about 3 hours with about 10GB of memory used(1 million episode replay buffer). With multiprocessing, I could run about 5 environment with 80~90% CPU(4.36/3.7GHz), 82%(51GB) Memory used and 1.7 GB GPU memory use. Because of the main network being small (3 conv layers and 2 fc layers) and environment running on cpu, the main bottleneck for the computation time and memory used were heavly dependant on cpu.
 
+## DQN(2015) 
+### Tasks
+* Breakout ([ALE/Breakout-v5](https://ale.farama.org/environments/breakout/), with repeat_action_prob = 0) 
+* Pong ([ALE/Pong-v5](https://ale.farama.org/environments/pong/), with repeat_action_prob = 0)
+* Seaquest ([ALE/Seaquest-v5](https://ale.farama.org/environments/seaquest/), with action_repeat_prob = 0)
+* SpaceInvaders ([ALE/SpaceInvaders-v5](https://ale.farama.org/environments/space_invaders/), with action_repeat_prob = 0)
+* Zaxxon ([ALE/Zaxxon-v5](https://ale.farama.org/environments/zaxxon/), with action_repeat_prob = 0)
+
+*Note: some of the enviroments(such as breakout) trained better by using episodic life(termination of environment after single failure) but some enviroment such as pong did not. I will specifiy which enviroment was used having episodic life.*
+*Note: Also metric used in this reimplementation is maximum rewards of 10 agents with non-episodic life. This can be misleading estimation of point stastics showing only agents with best performance. But since the objective of this project is to reimplement and show the exact performance metric shown on each of the paper, I will follow the maximum performance metric.*
 
 
 
