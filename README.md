@@ -36,6 +36,12 @@ Note:
 
 ![image](https://github.com/user-attachments/assets/ab78f449-8692-470e-a9fc-54acf55fa7de)
 
+### Hyperparameters
+
+|Hyperparameters|value|
+|-------|---|
+|frame stack|4|
+|training frames|4 * 10000000|
 
 
 
