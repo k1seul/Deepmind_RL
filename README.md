@@ -39,9 +39,16 @@ Note:
 ### Hyperparameters
 
 |Hyperparameters|value|
-|-------|---|
+|-------|------|
 |frame stack|4|
-|training frames|4 * 10000000|
+|training frames|40 million(4 skipped frame)|
+|n-step|1|
+|update frequncy|4|
+|train start frame|8000|
+|optimizer|RMSprop|
+|learning rate|2.5e-4|
+|RMSprop alpha|0.95|
+|test epsilon|0.05|
 
 
 
