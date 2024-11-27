@@ -52,6 +52,31 @@ Note:
 |test epsilon|0.05|
 
 
+## DDQN(2015)
+### Tasks
+* Asterix 
+* Breakout ([ALE/Breakout-v5](https://ale.farama.org/environments/breakout/), with repeat_action_prob = 0) 
+* Pong ([ALE/Pong-v5](https://ale.farama.org/environments/pong/), with repeat_action_prob = 0)
+* SpaceInvaders ([ALE/SpaceInvaders-v5](https://ale.farama.org/environments/space_invaders/), with action_repeat_prob = 0)
+* Zaxxon ([ALE/Zaxxon-v5](https://ale.farama.org/environments/zaxxon/), with action_repeat_prob = 0)
+
+### Reimplementation Targets 
+![image](https://github.com/user-attachments/assets/8a04a3fc-ecca-482a-8bf2-7bdd18cc9c91)
+
+### Hyperparameters
+
+|Hyperparameters|value|
+|-------|------|
+|frame stack|4|
+|training frames|40 million(4 skipped frame)|
+|buffer size|1 million|
+|n-step|1|
+|update frequncy|1|
+|train start frame|5000|
+|optimizer|RMSprop|
+|learning rate|2.5e-4|
+|RMSprop alpha|0.95|
+|test epsilon|0.05|
 
 
 
