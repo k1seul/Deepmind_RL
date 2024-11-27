@@ -4,6 +4,8 @@ from Agent import Agent
 from run_logic import run_main_logic, run_combinations
 import multiprocessing
 import copy
+import itertools
+import ray
 
 ## General
 parser = argparse.ArgumentParser(description="DQN")
@@ -93,25 +95,44 @@ parser.add_argument(
     "--adam-eps", type=float, default=1.5e-4, help="epsilon of adam optimizer"
 )
 parser.add_argument(
+    "--weight_decay", type=float, default=1e-4, help='weight decay of the optimizer'
+)
+parser.add_argument(
+    "--momentum", type=float, default=0.0, help='momentum value of the optimizer'
+)
+parser.add_argument(
     "--train-start-frame", type=int, default=5e3, help="training start frame number"
 )
 
-# games = ["ALE/Breakout-v5"]
-games = [
-    "ALE/Seaquest-v5",
-    "ALE/Breakout-v5",
-    "ALE/SpaceInvaders-v5",
-    "ALE/Pong-v5",
-    # "ALE/Zaxxon-v5",
-]
-epsodic_lifes = [True, True, True, False, True]
+parser.add_argument(
+    "--game_set", type=int, default=0, help="training game set" 
+)
 
-# games = ["ALE/Breakout-v5"]
+@ray.remote(num_gpus=0.05)
+def run_task(args, game, rng):
+    args.env_name = game
+    args.episodic_life = True
+    args.seed = rng
+    run_main_logic(args)
+
 args = parser.parse_args()
-args.double_net = True 
 # Iterate over and print all arguments
 for arg, value in vars(args).items():
     print(f"{arg}: {value}")
+
+if args.game_set == 0: 
+    games = [
+    "ALE/Breakout-v5",
+    "ALE/SpaceInvaders-v5",
+    "ALE/Alien-v5",
+    "ALE/TimePilot-v5",
+    "ALE/Asterix-v5"]
+    epsodic_lifes = [True] * len(games)
+elif args.game_set == 1:
+    games = [
+    ] 
+    epsodic_lifes = [True, True, True]
+
 
 if args.double_net:
     args.network_name += "_double"
@@ -124,7 +145,7 @@ if args.noisy_net:
 
 
 args.network_name += args.id
-if not(os.path.exits(args.pid_file)):
+if not(os.path.exists(args.pid_file)):
     with open(args.pid_file, "w") as f:
         f.write("Game PID Log\n")
 
@@ -135,19 +156,21 @@ if not os.path.exists(results_dir):
 print(results_dir)
 
 # run_main_logic(args)
-
+rngs = [0,1,2]
 processes = []
-for epsodic_life, game in zip(epsodic_lifes, games):
-    args_copy = copy.deepcopy(args)
-    args_copy.env_name = game
-    args_copy.episodic_life = epsodic_life
-    process = multiprocessing.Process(target=run_main_logic, args=(args_copy,))
-    processes.append(process)
 
-# Start all processes
-for process in processes:
-    process.start()
+ray.init(num_gpus=1)
 
-# Wait for all processes to finish
-for process in processes:
-    process.join()
+# Submit tasks
+tasks = [run_task.remote(args, game, rng) 
+         for game, rng in itertools.product(games, rngs)]
+ray.get(tasks)
+
+
+# # Start all processes
+# for process in processes:
+#     process.start()
+
+# # Wait for all processes to finish
+# for process in processes:
+#     process.join()

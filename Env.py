@@ -7,6 +7,7 @@ from collections import deque, namedtuple
 from pympler import asizeof
 import cv2
 from gymnasium import spaces
+import ale_py
 
 
 class ClipReward(gym.RewardWrapper, gym.utils.RecordConstructorArgs):
@@ -328,6 +329,7 @@ class LazyFrames(object):
 
 
 def make_atari(env_id):
+    gym.register_envs(ale_py)
     env = gym.make(env_id, frameskip=1, repeat_action_probability=0)
     # assert 'NoFrameskip' in env.spec.id
     env = NoopResetEnv(env, noop_max=30)
@@ -353,9 +355,9 @@ def wrap_deepmind(
         env = FrameStack(env, frame_stack)
 
     np.random.seed(seed)
-    env.seed(seed)
-    env.observation_space.seed(seed)
-    env.action_space.seed(seed)
+    # env.seed(seed)
+    # env.observation_space.seed(seed)
+    # env.action_space.seed(seed)
     return env
 
 

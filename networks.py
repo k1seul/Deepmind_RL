@@ -23,10 +23,12 @@ class DQN(nn.Module):
         for m in self.modules():
             if isinstance(m, nn.Conv2d):
                 nn.init.kaiming_normal_(m.weight, nonlinearity="relu")
-                m.bias.data.zero_()
+                nn.init.zeros_(m.bias)
             if isinstance(m, nn.Linear):
                 nn.init.xavier_uniform_(m.weight)
                 nn.init.zeros_(m.bias)
+            else:
+                KeyError("weight layer init method is not defined")
 
     def forward(self, x) -> torch.tensor:
         x = x / 255.0

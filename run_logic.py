@@ -101,7 +101,7 @@ def run_main_logic(args):
             f"Game: {args.env_name}, Episodic Life: {args.episodic_life}, PID: {pid}\n"
         )
 
-    log_dir = f"runs/{env_name}_{args.network_name}"
+    log_dir = f"runs/{env_name}_{args.network_name}_{args.seed}"
     writer = SummaryWriter(log_dir=log_dir)
     agent = Agent(args, writer=writer)
 

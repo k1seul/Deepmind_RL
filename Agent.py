@@ -55,7 +55,7 @@ class Agent:
         # Optimizer setting
         # self.optim = torch.optim.Adam(self.network.parameters(), lr= args.lr, eps=args.adam_eps)
         self.optim = torch.optim.RMSprop(
-            self.network.parameters(), lr=0.00025, alpha=0.95, eps=1e-6, weight_decay=0, momentum=0
+            self.network.parameters(), lr=0.00025, alpha=0.95, eps=1e-6, weight_decay=args.weight_decay, momentum=args.momentum
         )
 
         # Other setting
@@ -190,7 +190,7 @@ class Agent:
                 next_state = np.array(next_state, dtype=np.float32)
                 action = np.array(action)
                 reward = np.array(reward)
-                done = np.array(done, dtype=np.bool8)
+                done = np.array(done, dtype=np.bool_)
                 self.mem.add_experience(state, action, reward, done)
 
                 if 50 * t % (self.total_frames) == 0:
@@ -378,3 +378,9 @@ class Agent:
             self.network.state_dict(),
             f"data/{self.env_name}/{self.network_name}_{step}.pt",
         )
+
+    # Soft update function
+    def soft_update(self, target, source, tau=0.005):
+        for target_param, source_param in zip(target.parameters(), source.parameters()):
+            target_param.data.copy_(tau * source_param.data + (1.0 - tau) * target_param.data)
+

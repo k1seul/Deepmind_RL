@@ -191,7 +191,7 @@ def check_mem(env: gym.Env, mem_size=100_000):
         next_state, reward, done, truncated, _ = env.step(action)
         action = np.array(action, dtype=np.uint8)
         reward = np.array(reward, dtype=np.uint8)
-        done = np.array(done, dtype=np.bool8)
+        done = np.array(done, dtype=np.bool_)
         # import pdb; pdb.set_trace()
         mem.add_experience(state, action, reward, done)
         state = next_state
