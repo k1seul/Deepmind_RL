@@ -55,7 +55,7 @@ class Agent:
         # Optimizer setting
         # self.optim = torch.optim.Adam(self.network.parameters(), lr= args.lr, eps=args.adam_eps)
         self.optim = torch.optim.RMSprop(
-            self.network.parameters(), lr=0.00025, alpha=0.95
+            self.network.parameters(), lr=0.00025, alpha=0.95, eps=1e-6, weight_decay=0, momentum=0
         )
 
         # Other setting
@@ -193,7 +193,7 @@ class Agent:
                 done = np.array(done, dtype=np.bool8)
                 self.mem.add_experience(state, action, reward, done)
 
-                if 10 * t % (self.total_frames) == 0:
+                if 50 * t % (self.total_frames) == 0:
                     self.save_network(t)
 
                 t += 1

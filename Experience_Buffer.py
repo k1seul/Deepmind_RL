@@ -17,18 +17,23 @@ class ExperienceMemoryBuffer:
         self.n_step = n_step
 
     def add_experience(self, state, action, reward, done):
-        index = self.position % self.capacity
-        # import pdb; pdb.set_trace()
+        index = self.position 
         self.states[index] = state
         self.actions[index] = action
         self.rewards[index] = reward
         self.dones[index] = done
 
-        self.position += 1
+        self.position = (self.position + 1 ) % self.capacity
         self.size = min(self.size + 1, self.capacity)
 
     def sample(self, batch_size=32):
         indices = np.random.choice(self.size - self.n_step, batch_size, replace=False)
+        for i in range(len(indices)):
+            # better edge case handling
+            if indices[i] < self.position and indices[i] + self.n_step > self.position:
+                indices[i] = int(min(self.position - self.n_step, indices[i]))
+            if indices[i] + self.n_step > self.capacity - 1:
+                indices[i] = int(min(self.capacity - self.n_step - 1, indices[i]))
         states = np.stack(
             [
                 np.stack([self.select_stacked_states(i + j) for i in indices])

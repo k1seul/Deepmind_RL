@@ -22,7 +22,6 @@ class DQN(nn.Module):
 
         for m in self.modules():
             if isinstance(m, nn.Conv2d):
-                # nn.init.orthogonal_(m.weight, gain=math.sqrt(2))
                 nn.init.kaiming_normal_(m.weight, nonlinearity="relu")
                 m.bias.data.zero_()
             if isinstance(m, nn.Linear):
