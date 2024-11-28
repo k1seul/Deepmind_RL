@@ -8,6 +8,7 @@ from pympler import asizeof
 import cv2
 from gymnasium import spaces
 import ale_py
+import envpool
 
 
 class ClipReward(gym.RewardWrapper, gym.utils.RecordConstructorArgs):
@@ -67,7 +68,7 @@ class NoopResetEnv(gym.Wrapper):
         self.noop_max = noop_max
         self.override_num_noops = None
         self.noop_action = 0
-        assert env.unwrapped.get_action_meanings()[0] == "NOOP"
+        # assert env.unwrapped.get_action_meanings()[0] == "NOOP"
 
     def reset(self, **kwargs):
         """Do no-op action for a number of steps in [1, noop_max]."""
@@ -329,7 +330,7 @@ class LazyFrames(object):
 
 
 def make_atari(env_id):
-    gym.register_envs(ale_py)
+    # gym.register_envs(ale_py)
     env = gym.make(env_id, frameskip=1, repeat_action_probability=0)
     # assert 'NoFrameskip' in env.spec.id
     env = NoopResetEnv(env, noop_max=30)
@@ -376,3 +377,28 @@ if __name__ == "__main__":
         show_img(img, i)
 
     print(state)
+
+
+class SqueezeEnv(gym.ObservationWrapper):
+    # def reset(self, )
+    def reset(self, **kwargs):
+        """Do no-op action for a number of steps in [1, noop_max]."""
+        (state, info), _ = self.env.reset(**kwargs)
+        return state.squeeze(), info
+    def observation(self, observation):
+        # careful! This undoes the memory optimization, use
+        # with smaller replay buffers only.
+        # import pdb; pdb.set_trace()
+        return observation.squeeze()
+
+
+def make_atari_env_pool(env_id, episodic_life=False, reward_clip = False, seed=42):
+    env = envpool.make(env_id, 'gymnasium', seed=seed,
+                       frame_skip=1, noop_max = 30, episodic_life = episodic_life,
+                       reward_clip=reward_clip, repeat_action_probability=0,
+                       use_fire_reset=True, stack_num=1)
+    env = MaxAndSkipEnv(env)
+    env = SqueezeEnv(env)
+    # env = NoopResetEnv(env)
+    
+    return env

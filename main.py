@@ -12,6 +12,10 @@ parser = argparse.ArgumentParser(description="DQN")
 parser.add_argument("--id", type=str, default="default", help="Experiment ID")
 parser.add_argument("--seed", type=int, default=10, help="Random seed")
 parser.add_argument("--device", type=str, default="cuda", help="network run device")
+parser.add_argument("--ray", action='store_true', help="run multiple envs")
+### Don't use, gym is faster
+parser.add_argument("--env_pool", action="store_true", help="use env_pool to make env instead of gymnasium (envs are not in ALE name space)")
+parser.add_argument("--torch_buffer", action="store_true", help="use gpu experience buffer implemented with pytorch")
 parser.add_argument(
     "--performance-eval-freq",
     type=str,
@@ -45,7 +49,7 @@ parser.add_argument(
 
 ## Environment Setting
 parser.add_argument(
-    "--env_name", type=str, default="PongNoFrameskip-v4", help="name of a gym environment"
+    "--env_name", type=str, default="ALE/Breakout-v5", help="name of a gym environment"
 )
 parser.add_argument(
     "--episodic_life", action="store_true", help="turns on episodic life"
@@ -159,12 +163,18 @@ print(results_dir)
 rngs = [0,1,2]
 processes = []
 
-ray.init(num_gpus=1)
 
-# Submit tasks
-tasks = [run_task.remote(args, game, rng) 
-         for game, rng in itertools.product(games, rngs)]
-ray.get(tasks)
+
+if args.ray: 
+    ray.init(num_gpus=1)
+
+    # Submit tasks
+    tasks = [run_task.remote(args, game, rng) 
+            for game, rng in itertools.product(games, rngs)]
+    ray.get(tasks)
+else:
+    run_main_logic(args)
+
 
 
 # # Start all processes

@@ -1,20 +1,22 @@
 import numpy as np
 from PriorityHeap import PriorityHeap, SumTree
+import torch
 
 
 class ExperienceMemoryBuffer:
     ### Numpy implementation
-    def __init__(self, maxlen=100_000, state_shape=(84, 84), n_step=1, FRAME_STACK=4):
+    def __init__(self, maxlen=100_000, state_shape=(84, 84), n_step=1, FRAME_STACK=4, device='cuda'):
         self.capacity = maxlen
         self.states = np.zeros((self.capacity, *state_shape), dtype=np.uint8)
         # self.states = np.zeros((self.capacity, *state_shape), dtype=np.float32)
-        self.actions = np.zeros(self.capacity, dtype=np.uint8)
+        self.actions = np.zeros(self.capacity, dtype=np.int64)
         self.rewards = np.zeros(self.capacity, dtype=np.float32)
         self.dones = np.zeros(self.capacity, dtype=np.float32)
         self.position = 0
         self.size = 0
         self.stack_num = FRAME_STACK
         self.n_step = n_step
+        self.device = 'cuda'
 
     def add_experience(self, state, action, reward, done):
         index = self.position 
@@ -49,6 +51,11 @@ class ExperienceMemoryBuffer:
                 for j in range(self.n_step)
             ]
         )
+        states = torch.tensor(states, device=self.device, dtype=torch.uint8)
+        actions = torch.tensor(actions, device=self.device, dtype=torch.int64)
+        rewards = torch.tensor(rewards, device=self.device, dtype=torch.float32)
+        next_states = torch.tensor(next_states, device=self.device, dtype=torch.float32)
+        dones = torch.tensor(dones, device=self.device, dtype=torch.float32)
 
         return states, actions, rewards, next_states, dones
 
@@ -60,6 +67,67 @@ class ExperienceMemoryBuffer:
         indices = [max(i, 0) for i in indices]
 
         return np.stack([self.states[i] for i in indices])
+    
+    
+    
+
+class ExperienceMemoryBufferTorch(ExperienceMemoryBuffer):
+    ## Torch Tensor implementation
+    def __init__(self, maxlen=100_000, state_shape=(84, 84), n_step=1, FRAME_STACK=4, device='cuda'):
+        self.capacity = maxlen
+        self.states = torch.zeros((self.capacity, *state_shape), dtype=torch.uint8, requires_grad=False, device=device)
+        # self.states = np.zeros((self.capacity, *state_shape), dtype=np.float32)
+        self.actions = torch.zeros(self.capacity, dtype=torch.int64, requires_grad=False, device=device)
+        self.rewards = torch.zeros(self.capacity, dtype=torch.float32, requires_grad=False, device=device)
+        self.dones = torch.zeros(self.capacity, dtype=torch.float32, requires_grad=False, device=device)
+        self.position = 0
+        self.size = 0
+        self.stack_num = FRAME_STACK
+        self.n_step = n_step
+
+    def add_experience(self, state, action, reward, done):
+        index = self.position 
+        self.states[index] = torch.tensor(state, dtype=torch.uint8, device='cuda')
+        self.actions[index] = torch.tensor(action, device='cuda')
+        self.rewards[index] = torch.tensor(reward, device='cuda')
+        self.dones[index] = torch.tensor(done, device='cuda')
+
+        self.position = (self.position + 1 ) % self.capacity
+        self.size = min(self.size + 1, self.capacity)
+    
+    def sample(self, batch_size=32):
+        indices = np.random.choice(self.size - self.n_step, batch_size, replace=False)
+        for i in range(len(indices)):
+            # better edge case handling
+            if indices[i] < self.position and indices[i] + self.n_step > self.position:
+                indices[i] = int(min(self.position - self.n_step, indices[i]))
+            if indices[i] + self.n_step > self.capacity - 1:
+                indices[i] = int(min(self.capacity - self.n_step - 1, indices[i]))
+        states = torch.stack(
+            [
+                torch.stack([self.select_stacked_states(i + j) for i in indices])
+                for j in range(self.n_step)
+            ]
+        )
+        actions = torch.stack([self.actions[indices + j] for j in range(self.n_step)])
+        rewards = torch.stack([self.rewards[indices + j] for j in range(self.n_step)])
+        dones = torch.stack([self.dones[indices + j] for j in range(self.n_step)])
+        next_states = torch.stack(
+            [
+                torch.stack([self.select_stacked_states(i + j + 1) for i in indices])
+                for j in range(self.n_step)
+            ]
+        )
+        # import pdb; pdb.set_trace()
+        return states, actions, rewards, next_states, dones
+    
+    def select_stacked_states(self, index):
+        indices = list(range(index - self.stack_num + 1, index + 1))
+        indices = [max(i, 0) for i in indices]
+
+        return torch.stack([self.states[i] for i in indices])
+
+    
 
 
 class ExperienceMemoryBufferPER:
@@ -71,6 +139,7 @@ class ExperienceMemoryBufferPER:
         n_step=1,
         FRAME_STACK=4,
         beta_start=0.4,
+        device='cuda'
     ):
         self.capacity = maxlen
         self.states = np.zeros((self.capacity, *state_shape), dtype=np.uint8)
@@ -85,6 +154,7 @@ class ExperienceMemoryBufferPER:
         self.beta_end = 1.0
         self.beta_anneal_episode = 500_000
         self.per_heap = SumTree(capacity=maxlen)
+        self.device = device
 
     def beta_anneal(self):
         self.beta = min(
@@ -143,6 +213,12 @@ class ExperienceMemoryBufferPER:
                 for j in range(self.n_step)
             ]
         )
+
+        states = torch.tensor(states, device=self.device, dtype=torch.uint8)
+        actions = torch.tensor(actions, device=self.device, dtype=torch.int64)
+        rewards = torch.tensor(rewards, device=self.device, dtype=torch.float32)
+        next_states = torch.tensor(next_states, device=self.device, dtype=torch.float32)
+        dones = torch.tensor(dones, device=self.device, dtype=torch.float32)
 
         return states, actions, rewards, next_states, dones, importance_weights
 

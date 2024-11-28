@@ -1,15 +1,16 @@
 import torch
-from torch.nn import MSELoss
+from torch.nn import MSELoss, HuberLoss
 import numpy as np
-from Experience_Buffer import ExperienceMemoryBuffer, ExperienceMemoryBufferPER
+from Experience_Buffer import ExperienceMemoryBuffer, ExperienceMemoryBufferPER, ExperienceMemoryBufferTorch
 from networks import DQN, DQNSimple
 from networks import DuelDQN, DualDQNSimple
 from collections import deque
 import random
 from tensorboardX import SummaryWriter
-from Env import make_env, wrap_deepmind, make_atari
+from Env import make_env, wrap_deepmind, make_atari, make_atari_env_pool 
 from save_tools import save_gif_to_tensorboard
 import os
+import time
 
 
 class Agent:
@@ -29,11 +30,17 @@ class Agent:
         # Env init
         self.env_name = args.env_name
         self.network_name = args.network_name
+        self.env_pool = args.env_pool
         # self.env = make_env(self.env_name, clip_reward=True)
-        env = make_atari(self.env_name)
-        self.env = wrap_deepmind(
-            env, episode_life=args.episodic_life, clip_rewards=True, frame_stack=False
-        )
+        if args.env_pool:
+            env = make_atari_env_pool(self.env_name, episodic_life=args.episodic_life,
+                                      reward_clip=True)
+            self.env = env
+        else:
+            env = make_atari(self.env_name)
+            self.env = wrap_deepmind(
+                env, episode_life=args.episodic_life, clip_rewards=True, frame_stack=False
+            )
         self.n_actions = self.env.action_space.n
 
         # Network init
@@ -119,6 +126,16 @@ class Agent:
             param.requires_grad = False
 
     def _init_experience_replay(self, args):
+        self.torch_buffer = args.torch_buffer
+        if args.torch_buffer:
+            self.mem = ExperienceMemoryBufferTorch(
+                maxlen=args.buffer_size,
+                state_shape=[84, 84],
+                n_step=self.n_steps,
+                FRAME_STACK=self.frame_stack,
+            )
+            self.loss = HuberLoss()
+            return
         if self.per:
             self.mem = ExperienceMemoryBufferPER(
                 maxlen=args.buffer_size,
@@ -159,9 +176,9 @@ class Agent:
 
     def reset(self, env=None):
         if env is None:
-            state, _ = self.env.reset()
+            state, *_ = self.env.reset()
         else:
-            state, _ = env.reset()
+            state, *_ = env.reset()
         self.states_mem = deque(maxlen=self.frame_stack)
         state = np.array(state, dtype=np.uint8)
         for _ in range(self.frame_stack):
@@ -171,6 +188,7 @@ class Agent:
     def train(self, writer):
         t = 0
         episode_num = 0
+        start_time = time.time()
 
         while t < self.total_frames:
             done = False
@@ -204,7 +222,6 @@ class Agent:
                 if t >= self.train_start_frame:
                     if t % self.update_freq == 0:
                         update_samples = self.mem.sample()
-                        # import pdb;pdb.set_trace()
                         if update_samples is None:
                             raise BufferError("update sample is empty!")
                         avg_q_values, td_loss = self.update(update_samples)
@@ -228,6 +245,7 @@ class Agent:
                 )
 
             if episode_num % 10 == 0:
+                writer.add_scalar("data/frames", t, episode_num)
                 writer.add_scalar("data/rewards", total_rewards, episode_num)
                 writer.add_scalar("data/epsilons", self.epsilon, episode_num)
                 writer.add_scalar(
@@ -239,6 +257,9 @@ class Agent:
                 )
                 writer.add_scalar(
                     "data/avg_q", avg_q_values_total / episode_length, episode_num
+                )
+                writer.add_scalar(
+                    "data/fps", t/(time.time() - start_time), episode_num
                 )
 
             print(
@@ -255,11 +276,16 @@ class Agent:
         rewards = []
         max_frame = self.performance_eval_max_frame
         # env = make_env(self.env_name, clip_reward=False)
-        env = make_atari(self.env_name)
+        if self.env_pool:
+            env = make_atari_env_pool(self.env_name, episodic_life=False,
+                                      reward_clip=False,)
+        else:
+            env = make_atari(self.env_name)
+            
+            env = wrap_deepmind(
+                env, episode_life=False, clip_rewards=False, frame_stack=False
+            )
         rendering = []
-        env = wrap_deepmind(
-            env, episode_life=False, clip_rewards=False, frame_stack=False
-        )
         for i in range(eval_episode):
             done = False
             truncated = False
@@ -303,7 +329,7 @@ class Agent:
                 q_values = self.network(obs.reshape(1, *obs.shape))
                 action = np.argmax(q_values.detach().cpu().numpy())
 
-        return action
+        return action 
 
     def update(self, samples):
         if self.per:
@@ -313,17 +339,6 @@ class Agent:
             )
         else:
             states, actions, rewards, next_states, dones = samples
-
-        # Convert to tensors and move to device once
-        states = torch.tensor(states, device=self.device, dtype=torch.float32)
-        actions = torch.tensor(actions, device=self.device, dtype=torch.int64)
-        rewards = torch.tensor(rewards, device=self.device, dtype=torch.float32)
-        next_states = torch.tensor(next_states, device=self.device, dtype=torch.float32)
-        dones = torch.tensor(dones, device=self.device, dtype=torch.float32)
-
-        # if self.noisy_net:
-        #     self.network.reset()
-        #     self.target_net.reset()
 
         # Select Q-values for next states with double network if applicable
         Q_target_n_next_states = (self.target_net if self.double_net else self.network)(
