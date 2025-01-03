@@ -1,6 +1,0 @@
-Game PID Log
-Game: ALE/Breakout-v5, Episodic Life: True, PID: 85422
-Game: ALE/SpaceInvaders-v5, Episodic Life: True, PID: 85423
-Game: ALE/Pong-v5, Episodic Life: False, PID: 85424
-Game: ALE/Seaquest-v5, Episodic Life: True, PID: 170809
-Game: ALE/Breakout-v5, Episodic Life: True, PID: 170810

@@ -1,0 +1,12 @@
+project_name: 'plastic'
+entity: 'k1seul_davian'
+group_name: 'test'
+exp_name: 'test'
+device: cuda:0
+seed: 0
+
+defaults:
+- _self_
+- agent: ddqn
+- env: atari
+- model: nature
